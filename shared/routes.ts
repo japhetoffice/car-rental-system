@@ -1,5 +1,7 @@
 import { z } from 'zod';
-import { insertCarSchema, insertBookingSchema, cars, bookings } from './schema';
+import { insertCarSchema, insertBookingSchema, cars, bookings, type CreateCarRequest, type UpdateCarRequest, type CreateBookingRequest, type UpdateBookingStatusRequest } from './schema';
+
+export type { CreateCarRequest, UpdateCarRequest, CreateBookingRequest, UpdateBookingStatusRequest };
 
 export const errorSchemas = {
   validation: z.object({

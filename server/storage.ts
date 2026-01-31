@@ -27,8 +27,6 @@ export class DatabaseStorage implements IStorage {
       query = query.where(eq(cars.status, status));
     }
     
-    // Simple search implementation (can be improved)
-    // Note: Drizzle's like/ilike might be better for search if search param is provided
     const allCars = await query;
     if (search) {
       const lowerSearch = search.toLowerCase();
@@ -39,6 +37,11 @@ export class DatabaseStorage implements IStorage {
     }
     
     return allCars;
+  }
+
+  async getUser(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
   }
 
   async getCar(id: number): Promise<Car | undefined> {

@@ -11,10 +11,7 @@ const isAdmin = async (req: any, res: any, next: any) => {
   const userId = req.user?.claims?.sub;
   if (!userId) return res.status(401).json({ message: "Unauthorized" });
   
-  const user = await storage.getUser(userId); // We might need to add this to storage or use authStorage
-  // Actually, let's use authStorage directly or add to main storage
-  const { authStorage } = await import("./replit_integrations/auth");
-  const dbUser = await authStorage.getUser(userId);
+  const dbUser = await storage.getUser(userId);
   
   if (dbUser?.role !== "admin") {
     return res.status(403).json({ message: "Forbidden: Admin access required" });
