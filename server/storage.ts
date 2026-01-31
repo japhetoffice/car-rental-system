@@ -1,6 +1,6 @@
 import { db } from "./db";
-import { cars, bookings, type Car, type InsertCar, type Booking, type InsertBooking } from "@shared/schema";
-import { eq, and, or, lt, gt } from "drizzle-orm";
+import { cars, bookings, users, type Car, type InsertCar, type Booking, type InsertBooking, type User } from "@shared/schema";
+import { eq, and, or, sql } from "drizzle-orm";
 
 export interface IStorage {
   // Cars
@@ -21,22 +21,19 @@ export interface IStorage {
 
 export class DatabaseStorage implements IStorage {
   async getCars(status?: string, search?: string): Promise<Car[]> {
-    let query = db.select().from(cars);
+    const results = await db.select().from(cars).where(
+      status ? eq(cars.status, status) : undefined
+    );
     
-    if (status) {
-      query = query.where(eq(cars.status, status));
-    }
-    
-    const allCars = await query;
     if (search) {
       const lowerSearch = search.toLowerCase();
-      return allCars.filter(c => 
+      return results.filter(c => 
         c.make.toLowerCase().includes(lowerSearch) || 
         c.model.toLowerCase().includes(lowerSearch)
       );
     }
     
-    return allCars;
+    return results;
   }
 
   async getUser(id: string): Promise<User | undefined> {

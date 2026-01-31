@@ -70,7 +70,7 @@ export default function Catalog() {
           <div className="text-center py-20">
             <p className="text-lg text-muted-foreground">No vehicles found matching your criteria.</p>
             <Button 
-              variant="link" 
+              variant="outline" 
               onClick={() => { setSearch(""); setStatusFilter("all"); }}
               className="mt-2"
             >
