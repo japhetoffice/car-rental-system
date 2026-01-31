@@ -6,6 +6,22 @@ import { insertCarSchema, insertBookingSchema } from "@shared/schema";
 import { z } from "zod";
 import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
 
+// Middleware to check for admin role
+const isAdmin = async (req: any, res: any, next: any) => {
+  const userId = req.user?.claims?.sub;
+  if (!userId) return res.status(401).json({ message: "Unauthorized" });
+  
+  const user = await storage.getUser(userId); // We might need to add this to storage or use authStorage
+  // Actually, let's use authStorage directly or add to main storage
+  const { authStorage } = await import("./replit_integrations/auth");
+  const dbUser = await authStorage.getUser(userId);
+  
+  if (dbUser?.role !== "admin") {
+    return res.status(403).json({ message: "Forbidden: Admin access required" });
+  }
+  next();
+};
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
@@ -31,9 +47,7 @@ export async function registerRoutes(
   });
 
   // Protected Admin Routes for Cars
-  // Note: For simplicity in this demo, we might check a specific email or just allow any authenticated user to be admin if no role system is strict yet.
-  // Ideally, we'd check req.user.claims.email or a role in DB.
-  app.post(api.cars.create.path, isAuthenticated, async (req, res) => {
+  app.post(api.cars.create.path, isAuthenticated, isAdmin, async (req, res) => {
     try {
       const input = insertCarSchema.parse(req.body);
       const car = await storage.createCar(input);
@@ -49,7 +63,7 @@ export async function registerRoutes(
     }
   });
 
-  app.put(api.cars.update.path, isAuthenticated, async (req, res) => {
+  app.put(api.cars.update.path, isAuthenticated, isAdmin, async (req, res) => {
     try {
       const id = Number(req.params.id);
       const input = insertCarSchema.partial().parse(req.body);
@@ -69,7 +83,7 @@ export async function registerRoutes(
     }
   });
 
-  app.delete(api.cars.delete.path, isAuthenticated, async (req, res) => {
+  app.delete(api.cars.delete.path, isAuthenticated, isAdmin, async (req, res) => {
     const id = Number(req.params.id);
     const car = await storage.getCar(id);
     if (!car) {
@@ -79,66 +93,9 @@ export async function registerRoutes(
     res.status(204).send();
   });
 
-  // Bookings Routes
-  app.get(api.bookings.list.path, isAuthenticated, async (req, res) => {
-    // If admin, show all? Or filter?
-    // For now, let's just return bookings for the user unless they are admin (which we'd need to check)
-    // To keep it simple: return user's bookings.
-    // If we want admin to see all, we need an admin check.
-    const user = req.user as any;
-    const bookings = await storage.getBookings(user.claims.sub);
-    res.json(bookings);
-  });
-
-  app.post(api.bookings.create.path, isAuthenticated, async (req, res) => {
-    try {
-      const user = req.user as any;
-      const { carId, startDate, endDate } = req.body;
-      
-      const start = new Date(startDate);
-      const end = new Date(endDate);
-
-      // Basic validation
-      if (start >= end) {
-        return res.status(400).json({ message: "End date must be after start date" });
-      }
-      
-      // Check availability
-      const isAvailable = await storage.checkAvailability(carId, start, end);
-      if (!isAvailable) {
-        return res.status(400).json({ message: "Car is not available for these dates" });
-      }
-
-      const car = await storage.getCar(carId);
-      if (!car) {
-        return res.status(404).json({ message: "Car not found" });
-      }
-
-      // Calculate total price
-      const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-      const totalPrice = Number(car.dailyRate) * days;
-
-      const booking = await storage.createBooking({
-        userId: user.claims.sub,
-        carId,
-        startDate: start,
-        endDate: end,
-        totalPrice: totalPrice.toString(), // Decimal as string or number? Drizzle decimal is string usually
-        status: "confirmed", // Auto-confirm for simplicity
-        paymentStatus: "pending"
-      });
-
-      res.status(201).json(booking);
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: "Internal server error" });
-    }
-  });
-
-  app.patch(api.bookings.updateStatus.path, isAuthenticated, async (req, res) => {
+  app.patch(api.bookings.updateStatus.path, isAuthenticated, isAdmin, async (req, res) => {
       const id = Number(req.params.id);
       const { status } = req.body;
-      // Ideally check if user owns booking or is admin
       const booking = await storage.updateBookingStatus(id, status);
       if (!booking) {
           return res.status(404).json({ message: "Booking not found" });
