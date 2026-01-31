@@ -1,0 +1,253 @@
+🚗 Full-Stack Car Rental Management System (Replit-Optimized)
+📌 Project Description
+
+A full-stack web application that allows customers to browse, search, and book rental cars online, while administrators manage vehicles, reservations, and view business analytics.
+The system is designed to run entirely on Replit, using its built-in PostgreSQL database and Replit Auth.
+
+🧱 Tech Stack (Replit-Friendly)
+Frontend
+
+React (Vite or CRA)
+
+Tailwind CSS – utility-first styling for fast UI development
+
+lucide-react – clean, modern icon set
+
+Axios – API communication
+
+React Router – client-side routing
+
+Backend
+
+Node.js + Express
+
+JWT (via Replit Auth session tokens)
+
+RESTful API architecture
+
+Database
+
+Replit PostgreSQL (built-in)
+
+Accessed via:
+
+process.env.DATABASE_URL
+
+pg (node-postgres)
+
+Authentication
+
+Replit Auth
+
+OAuth-based login
+
+Auto user creation on first login
+
+Role-based access (Customer / Admin)
+
+👥 User Roles & Features
+👤 Customer (User Role)
+1. Landing Page
+
+Search bar with:
+
+📍 Location
+
+📅 Pick-up & Return dates
+
+Featured vehicles
+
+Responsive hero section
+
+2. Vehicle Catalog
+
+Display available cars only
+
+Filters:
+
+Car Type (SUV, Sedan, Hatchback, etc.)
+
+Transmission (Automatic / Manual)
+
+Price range (Daily rate)
+
+Sort by price or popularity
+
+3. Booking Flow
+
+Select car
+
+Choose rental dates
+
+Auto-calculate total price
+
+Confirm booking
+
+✅ Booking validation:
+
+No overlapping bookings
+
+Date range must be valid
+
+Car must be available
+
+4. User Dashboard
+
+Active rentals
+
+Past rentals
+
+Booking details:
+
+Dates
+
+Total price
+
+Status
+
+🛠️ Admin Role
+1. Admin Dashboard
+
+Total revenue
+
+Number of active rentals
+
+Available vs booked vehicles
+
+2. Fleet Management (CRUD)
+
+Add / Edit / Delete cars
+
+Fields:
+
+Car name
+
+Type
+
+Transmission
+
+Daily rate
+
+Image URL
+
+Status (Available / Maintenance)
+
+3. Booking Management
+
+View all bookings
+
+Cancel bookings
+
+See customer details
+
+Change booking status
+
+🧠 Core Business Logic
+🚫 Prevent Double Booking
+
+Before confirming a booking, check:
+
+SELECT * FROM bookings
+WHERE car_id = $1
+AND (
+  (start_date <= $2 AND end_date >= $2)
+  OR
+  (start_date <= $3 AND end_date >= $3)
+);
+
+
+If any record exists → ❌ booking denied.
+
+💰 Price Calculation
+Total Price = Daily Rate × Number of Rental Days
+
+
+Minimum rental: 1 day
+
+Automatically computed on backend
+
+Returned to frontend before confirmation
+
+🗄️ Suggested Database Schema (Replit PostgreSQL)
+users
+
+id
+
+email
+
+name
+
+role (user | admin)
+
+created_at
+
+cars
+
+id
+
+name
+
+type
+
+transmission
+
+daily_rate
+
+image_url
+
+status
+
+created_at
+
+bookings
+
+id
+
+user_id
+
+car_id
+
+start_date
+
+end_date
+
+total_price
+
+status
+
+created_at
+
+🎨 UI / Design Guidelines
+
+Clean Enterprise / SaaS-style UI
+
+Neutral color palette (gray, slate, blue)
+
+Consistent spacing
+
+Lucide icons only
+
+Fully responsive (mobile-first)
+
+Dashboard-style layouts for admin
+
+📦 Replit Project Structure
+/server
+ ├── index.js
+ ├── routes/
+ ├── controllers/
+ ├── middleware/
+ └── db.js
+
+/client
+ ├── src/
+ │   ├── pages/
+ │   ├── components/
+ │   ├── hooks/
+ │   └── services/
+
+🔐 Environment Variables (Replit Secrets)
+DATABASE_URL
+REPLIT_CLIENT_ID
+REPLIT_CLIENT_SECRET
+SESSION_SECRET
