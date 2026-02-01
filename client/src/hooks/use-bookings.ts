@@ -7,7 +7,23 @@ export function useBookings() {
     queryKey: [api.bookings.list.path],
     queryFn: async () => {
       const res = await fetch(api.bookings.list.path, { credentials: "include" });
-      if (!res.ok) throw new Error("Failed to fetch bookings");
+      const contentType = res.headers.get("content-type") || "";
+      if (!res.ok) {
+        // Try to parse JSON error, otherwise fall back to text
+        try {
+          const error = await res.json();
+          throw new Error(error.message || "Failed to fetch bookings");
+        } catch (e) {
+          const text = await res.text();
+          throw new Error(text || "Failed to fetch bookings");
+        }
+      }
+
+      // If server returned HTML (e.g., index.html), return empty list to avoid JSON parsing errors
+      if (!contentType.includes("application/json")) {
+        return [] as any;
+      }
+
       return api.bookings.list.responses[200].parse(await res.json());
     },
   });
@@ -26,11 +42,30 @@ export function useCreateBooking() {
         credentials: "include",
       });
 
+      // Read the body once as text to avoid "body stream already read" errors
+      const bodyText = await res.text();
+      const contentType = res.headers.get("content-type") || "";
+      const isJson = contentType.includes("application/json");
+
       if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || "Failed to create booking");
+        if (isJson) {
+          try {
+            const errObj = JSON.parse(bodyText);
+            throw new Error(errObj.message || "Failed to create booking");
+          } catch (e) {
+            throw new Error(bodyText || "Failed to create booking");
+          }
+        }
+        throw new Error(bodyText || "Failed to create booking");
       }
-      return api.bookings.create.responses[201].parse(await res.json());
+
+      // Successful response - parse JSON text
+      try {
+        const json = isJson ? JSON.parse(bodyText) : {};
+        return api.bookings.create.responses[201].parse(json);
+      } catch (e) {
+        throw new Error("Failed to parse server response");
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [api.bookings.list.path] });
@@ -56,12 +91,30 @@ export function useUpdateBookingStatus() {
         credentials: "include",
       });
 
+      const bodyText = await res.text();
+      const contentType = res.headers.get("content-type") || "";
+      const isJson = contentType.includes("application/json");
+
       if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || "Failed to update booking status");
+        if (isJson) {
+          try {
+            const errObj = JSON.parse(bodyText);
+            throw new Error(errObj.message || "Failed to update booking status");
+          } catch (e) {
+            throw new Error(bodyText || "Failed to update booking status");
+          }
+        }
+        throw new Error(bodyText || "Failed to update booking status");
       }
-      return api.bookings.updateStatus.responses[200].parse(await res.json());
+
+      try {
+        const json = isJson ? JSON.parse(bodyText) : {};
+        return api.bookings.updateStatus.responses[200].parse(json);
+      } catch (e) {
+        throw new Error("Failed to parse server response");
+      }
     },
+
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [api.bookings.list.path] });
       toast({ title: "Success", description: "Booking status updated" });

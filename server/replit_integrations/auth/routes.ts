@@ -5,14 +5,30 @@ import { isAuthenticated } from "./replitAuth";
 // Register auth-specific routes
 export function registerAuthRoutes(app: Express): void {
   // Get current authenticated user
-  app.get("/api/auth/user", isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await authStorage.getUser(userId);
-      res.json(user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
+  app.get("/api/auth/user", isAuthenticated, (req, res) => {
+  // In development mode, return a mock user
+  if (process.env.NODE_ENV === 'development') {
+    return res.json({
+      id: 'dev-user-1',
+      email: 'dev@example.com',
+      firstName: 'Dev',
+      lastName: 'User',
+      profileImageUrl: 'https://via.placeholder.com/150'
+    });
+  }
+
+  // Production code
+  if (!req.user || !req.user.claims) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  const claims = req.user.claims;
+  res.json({
+    id: claims.sub,
+    email: claims.email,
+    firstName: claims.first_name,
+    lastName: claims.last_name,
+    profileImageUrl: claims.profile_image_url,
   });
+});
 }

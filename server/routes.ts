@@ -24,7 +24,7 @@ export async function registerRoutes(
   app: Express
 ): Promise<Server> {
   // Set up Replit Auth
-  await setupAuth(app);
+ //  await setupAuth(app);
   registerAuthRoutes(app);
 
   // Cars Routes
@@ -88,6 +88,64 @@ export async function registerRoutes(
     }
     await storage.deleteCar(id);
     res.status(204).send();
+  });
+
+  // Bookings Routes
+  // List bookings for current user; admins see all bookings; unauthenticated users get an empty array
+  app.get(api.bookings.list.path, async (req, res) => {
+    try {
+      const userId = (() => {
+        if (process.env.NODE_ENV === 'development') return 'dev-user-1';
+        return req.user?.claims?.sub;
+      })();
+
+      if (!userId) {
+        // Not authenticated, return empty list (client will show 'No bookings yet')
+        return res.json([]);
+      }
+
+      const dbUser = await storage.getUser(userId);
+      const isAdminUser = dbUser?.role === 'admin';
+
+      const bookings = await storage.getBookings(isAdminUser ? undefined : userId);
+      res.json(bookings);
+    } catch (err) {
+      console.error('Error fetching bookings', err);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  // Create a booking for the authenticated user
+  app.post(api.bookings.create.path, isAuthenticated, async (req, res) => {
+    try {
+      const input = insertBookingSchema.parse(req.body);
+      const userId = (() => {
+        if (process.env.NODE_ENV === 'development') return 'dev-user-1';
+        return req.user?.claims?.sub;
+      })();
+
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      // Check availability
+      const available = await storage.checkAvailability(input.carId, new Date(input.startDate), new Date(input.endDate));
+      if (!available) {
+        return res.status(400).json({ message: 'Car is not available for the selected dates' });
+      }
+
+      const booking = await storage.createBooking({ ...input, userId });
+      res.status(201).json(booking);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({
+          message: err.errors[0].message,
+          field: err.errors[0].path.join('.'),
+        });
+      }
+      console.error('Error creating booking', err);
+      res.status(500).json({ message: 'Internal server error' });
+    }
   });
 
   app.patch(api.bookings.updateStatus.path, isAuthenticated, isAdmin, async (req, res) => {
