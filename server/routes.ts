@@ -8,7 +8,7 @@ import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integra
 
 // Middleware to check for admin role
 const isAdmin = async (req: any, res: any, next: any) => {
-  const userId = req.user?.claims?.sub;
+  const userId = (req.user as any)?.claims?.sub;
   if (!userId) return res.status(401).json({ message: "Unauthorized" });
   
   const dbUser = await storage.getUser(userId);
@@ -96,7 +96,7 @@ export async function registerRoutes(
     try {
       const userId = (() => {
         if (process.env.NODE_ENV === 'development') return 'dev-user-1';
-        return req.user?.claims?.sub;
+        return (req.user as any)?.claims?.sub;
       })();
 
       if (!userId) {
@@ -118,23 +118,43 @@ export async function registerRoutes(
   // Create a booking for the authenticated user
   app.post(api.bookings.create.path, isAuthenticated, async (req, res) => {
     try {
-      const input = insertBookingSchema.parse(req.body);
+      // Validate only client-provided fields. Server will add userId, totalPrice, status, etc.
+      const createBookingSchema = insertBookingSchema.omit({ userId: true, totalPrice: true, status: true, paymentStatus: true });
+      const input = createBookingSchema.parse(req.body);
+
       const userId = (() => {
         if (process.env.NODE_ENV === 'development') return 'dev-user-1';
-        return req.user?.claims?.sub;
+        return (req.user as any)?.claims?.sub;
       })();
 
       if (!userId) {
         return res.status(401).json({ message: 'Unauthorized' });
       }
 
+      // Validate dates
+      const startDate = new Date(input.startDate);
+      const endDate = new Date(input.endDate);
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()) || startDate >= endDate) {
+        return res.status(400).json({ message: 'Invalid date range', field: 'startDate' });
+      }
+
       // Check availability
-      const available = await storage.checkAvailability(input.carId, new Date(input.startDate), new Date(input.endDate));
+      const available = await storage.checkAvailability(input.carId, startDate, endDate);
       if (!available) {
         return res.status(400).json({ message: 'Car is not available for the selected dates' });
       }
 
-      const booking = await storage.createBooking({ ...input, userId });
+      const car = await storage.getCar(input.carId);
+      if (!car) {
+        return res.status(404).json({ message: 'Car not found' });
+      }
+
+      // Compute total price server-side to avoid trusting client values
+      const msPerDay = 24 * 60 * 60 * 1000;
+      const days = Math.max(1, Math.ceil((endDate.getTime() - startDate.getTime()) / msPerDay));
+      const totalPrice = (Number(car.dailyRate) * days).toFixed(2);
+
+      const booking = await storage.createBooking({ ...input, userId, totalPrice });
       res.status(201).json(booking);
     } catch (err) {
       if (err instanceof z.ZodError) {
