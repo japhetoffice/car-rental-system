@@ -39,5 +39,17 @@ export function registerAuthRoutes(app: Express): void {
     lastName: claims.last_name,
     profileImageUrl: claims.profile_image_url,
   });
+
+  // Dev-friendly logout fallback to avoid 404 when setupAuth isn't initialized
+  app.get("/api/logout", (req, res) => {
+    try {
+      if (typeof (req as any).logout === "function") {
+        (req as any).logout(() => {});
+      }
+    } catch (err) {
+      console.warn("logout noop", err);
+    }
+    res.redirect("/");
+  });
 });
 }
