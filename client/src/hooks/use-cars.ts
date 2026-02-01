@@ -55,7 +55,7 @@ export function useCreateCar() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [api.cars.list.path] });
-      toast({ title: "Success", description: "Vehicle added to fleet" });
+      toast({ title: "Success", description: "Vehicle added to JJK Cars" });
     },
     onError: (error) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -110,7 +110,7 @@ export function useDeleteCar() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [api.cars.list.path] });
-      toast({ title: "Success", description: "Vehicle removed from fleet" });
+      toast({ title: "Success", description: "Vehicle removed from JJK Cars" });
     },
     onError: (error) => {
       toast({ title: "Error", description: error.message, variant: "destructive" });

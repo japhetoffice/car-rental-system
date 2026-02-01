@@ -27,7 +27,7 @@ export default function Catalog() {
     <Layout>
       <div className="bg-muted/30 py-12 border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-display font-bold mb-6">Our Fleet</h1>
+          <h1 className="text-3xl font-display font-bold mb-6">Our Cars</h1>
           
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-grow">

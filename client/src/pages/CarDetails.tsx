@@ -62,8 +62,8 @@ export default function CarDetails() {
     
     createBooking({
       carId: car.id,
-      startDate: date.from.toISOString(),
-      endDate: date.to.toISOString(),
+      startDate: date.from,
+      endDate: date.to,
     }, {
       onSuccess: () => setIsConfirmOpen(false),
     });

@@ -39,10 +39,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <div className="flex justify-between h-16">
             <div className="flex">
               <Link href="/" className="flex-shrink-0 flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
-                  <Car className="w-5 h-5" />
+                <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center">
+                  {/* Place your brand logo at /jjk-logo.svg in the public folder */}
+                  <img src="/jjk-logo.svg" alt="JJK Cars" className="w-full h-full object-cover" />
                 </div>
-                <span className="font-display font-bold text-xl tracking-tight">FleetCommand</span>
+                <span className="font-display font-bold text-xl tracking-tight">JJK Cars</span>
               </Link>
               <div className="hidden sm:ml-8 sm:flex sm:space-x-8">
                 {navLinks.map((link) => (
@@ -67,7 +68,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                       <Avatar className="h-9 w-9 border border-border">
-                        <AvatarImage src={user?.profileImageUrl} alt={user?.firstName || "User"} />
+                        <AvatarImage src={user?.profileImageUrl ?? undefined} alt={user?.firstName || "User"} />
                         <AvatarFallback>{user?.firstName?.[0] || "U"}</AvatarFallback>
                       </Avatar>
                     </Button>
@@ -186,13 +187,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center gap-2 mb-4 md:mb-0">
-              <div className="w-6 h-6 rounded bg-foreground text-background flex items-center justify-center">
-                <Car className="w-3 h-3" />
+              <div className="w-6 h-6 rounded overflow-hidden bg-foreground text-background flex items-center justify-center">
+                <img src="/jjk-logo.svg" alt="JJK Cars" className="w-full h-full object-cover" />
               </div>
-              <span className="font-display font-bold text-lg">FleetCommand</span>
+              <span className="font-display font-bold text-lg">JJK Cars</span>
             </div>
             <p className="text-muted-foreground text-sm">
-              &copy; 2024 FleetCommand Inc. All rights reserved.
+              &copy; 2024 JJK Cars Inc. All rights reserved.
             </p>
           </div>
         </div>

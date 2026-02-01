@@ -1,8 +1,8 @@
-# FleetCommand - Car Rental Management System
+# JJK Cars - Car Rental Management System
 
 ## Overview
 
-FleetCommand is a full-stack car rental management web application that allows customers to browse, search, and book rental vehicles online while administrators manage the fleet, reservations, and view business analytics. The system features a React frontend with a modern UI component library, an Express backend with RESTful APIs, PostgreSQL database with Drizzle ORM, and Replit Auth for authentication.
+JJK Cars is a full-stack car rental management web application that allows customers to browse, search, and book rental vehicles online while administrators manage the cars, reservations, and view business analytics. The system features a React frontend with a modern UI component library, an Express backend with RESTful APIs, PostgreSQL database with Drizzle ORM, and Replit Auth for authentication.
 
 ## User Preferences
 

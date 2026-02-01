@@ -54,7 +54,7 @@ export default function Bookings() {
           </div>
         ) : (
           <div className="space-y-6">
-            {bookings?.map((booking) => (
+            {bookings?.map((booking: any) => (
               <Card key={booking.id} className="overflow-hidden hover:shadow-md transition-shadow duration-200">
                 <div className="flex flex-col md:flex-row">
                   <div className="w-full md:w-48 h-32 md:h-auto bg-muted">

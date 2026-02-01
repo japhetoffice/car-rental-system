@@ -24,12 +24,12 @@ export default function Home() {
             Elevate Your Journey
           </h1>
           <p className="mx-auto max-w-2xl text-lg leading-8 text-gray-300 mb-10">
-            Premium fleet management and car rentals. Experience the freedom of the open road with our curated selection of luxury and performance vehicles.
+            Premium car rentals and car services by JJK Cars. Experience the freedom of the open road with our curated selection of luxury and performance vehicles.
           </p>
           <div className="flex justify-center gap-4">
             <Link href="/catalog">
               <Button size="lg" className="h-14 px-8 text-lg rounded-full">
-                Browse Fleet <ArrowRight className="ml-2 w-5 h-5" />
+                Browse Cars <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
           </div>
@@ -40,7 +40,25 @@ export default function Home() {
       <div className="py-24 bg-background">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-display font-bold text-foreground">Why Choose FleetCommand?</h2>
+            <p className="mx-auto max-w-2xl text-lg leading-8 text-gray-300 mb-10">
+            Premium car rentals and car services by JJK Cars. Experience the freedom of the open road with our curated selection of luxury and performance vehicles.
+          </p>
+          <div className="flex justify-center gap-4">
+            <Link href="/catalog">
+              <Button size="lg" className="h-14 px-8 text-lg rounded-full">
+                Browse Cars <ArrowRight className="ml-2 w-5 h-5" />
+              </Button>
+            </Link>
+          </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Features Section */}
+      <div className="py-24 bg-background">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-display font-bold text-foreground">Why Choose JJK Cars?</h2>
             <p className="mt-4 text-muted-foreground">We provide a seamless rental experience tailored to your needs.</p>
           </div>
 
@@ -58,7 +76,7 @@ export default function Home() {
               },
               {
                 icon: Star,
-                title: "Top Rated Fleet",
+                title: "Top Rated Cars",
                 description: "Our vehicles are meticulously maintained and regularly serviced to ensure safety and comfort."
               }
             ].map((feature, i) => (

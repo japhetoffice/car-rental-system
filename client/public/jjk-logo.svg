@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="64" viewBox="0 0 256 64">
+  <rect width="256" height="64" rx="8" fill="#0f172a" />
+  <g transform="translate(12,12)" fill="#ffffff">
+    <path d="M10 28c-2-4-2-8 8-8h56l8-12h36l8 12h14c10 0 10 4 8 8l-4 8H10l0-8z" opacity="0.9"/>
+  </g>
+  <text x="84" y="40" font-family="Inter, sans-serif" font-size="22" fill="#ffffff" font-weight="700">JJK Cars</text>
+</svg>

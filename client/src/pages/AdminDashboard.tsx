@@ -96,14 +96,14 @@ export default function AdminDashboard() {
   };
 
   const onSubmit = (data: CarFormValues) => {
-    // Ensure dailyRate is a string for the decimal type in DB if needed, but schema handles number input fine mostly
-    // We send number, backend handles.
+    // Convert dailyRate to string to match backend decimal expectations
+    const payload = { ...data, dailyRate: data.dailyRate.toFixed(2) } as any;
     if (editingCar) {
-      updateCar({ id: editingCar.id, ...data }, {
+      updateCar({ id: editingCar.id, ...payload }, {
         onSuccess: () => setIsCarModalOpen(false)
       });
     } else {
-      createCar(data, {
+      createCar(payload, {
         onSuccess: () => setIsCarModalOpen(false)
       });
     }
@@ -122,8 +122,8 @@ export default function AdminDashboard() {
   }
 
   // Calculate stats
-  const totalRevenue = bookings?.reduce((acc, b) => acc + Number(b.totalPrice), 0) || 0;
-  const activeBookings = bookings?.filter(b => b.status === 'confirmed').length || 0;
+  const totalRevenue = bookings?.reduce((acc: number, b: any) => acc + Number(b.totalPrice), 0) || 0;
+  const activeBookings = bookings?.filter((b: any) => b.status === 'confirmed').length || 0;
   const totalCars = cars?.length || 0;
 
   // Chart data
@@ -169,7 +169,7 @@ export default function AdminDashboard() {
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Fleet</CardTitle>
+              <CardTitle className="text-sm font-medium">Total Cars</CardTitle>
               <Car className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
@@ -179,14 +179,14 @@ export default function AdminDashboard() {
           </Card>
         </div>
 
-        <Tabs defaultValue="fleet" className="space-y-4">
+        <Tabs defaultValue="cars" className="space-y-4">
           <TabsList>
-            <TabsTrigger value="fleet">Fleet Management</TabsTrigger>
+            <TabsTrigger value="cars">Cars Management</TabsTrigger>
             <TabsTrigger value="bookings">Bookings</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="fleet" className="space-y-4">
+          <TabsContent value="cars" className="space-y-4">
             <Card>
               <Table>
                 <TableHeader>
@@ -204,7 +204,7 @@ export default function AdminDashboard() {
                         <Loader2 className="w-6 h-6 animate-spin mx-auto text-primary" />
                       </TableCell>
                     </TableRow>
-                  ) : cars?.map((car) => (
+                  ) : cars?.map((car: any) => (
                     <TableRow key={car.id}>
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-3">
@@ -256,7 +256,7 @@ export default function AdminDashboard() {
                     <TableRow>
                       <TableCell colSpan={6} className="text-center py-10">Loading...</TableCell>
                     </TableRow>
-                  ) : bookings?.map((booking) => (
+                  ) : bookings?.map((booking: any) => (
                     <TableRow key={booking.id}>
                       <TableCell>#{booking.id}</TableCell>
                       <TableCell>{booking.car.make} {booking.car.model}</TableCell>

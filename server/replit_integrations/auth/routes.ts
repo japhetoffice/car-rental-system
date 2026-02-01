@@ -18,11 +18,11 @@ export function registerAuthRoutes(app: Express): void {
   }
 
   // Production code
-  if (!req.user || !req.user.claims) {
+  if (!req.user || !(req.user as any).claims) {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
-  const claims = req.user.claims;
+  const claims = (req.user as any).claims;
   res.json({
     id: claims.sub,
     email: claims.email,
