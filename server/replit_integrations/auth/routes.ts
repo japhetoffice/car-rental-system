@@ -6,15 +6,24 @@ import { isAuthenticated } from "./replitAuth";
 export function registerAuthRoutes(app: Express): void {
   // Get current authenticated user
   app.get("/api/auth/user", isAuthenticated, (req, res) => {
-  // In development mode, return a mock user
+  // In development mode, return a mock user and ensure the user exists in DB for local testing
   if (process.env.NODE_ENV === 'development') {
-    return res.json({
+    const devUser = {
       id: 'dev-user-1',
       email: 'dev@example.com',
       firstName: 'Dev',
       lastName: 'User',
-      profileImageUrl: 'https://via.placeholder.com/150'
-    });
+      profileImageUrl: 'https://via.placeholder.com/150',
+    };
+
+    // Persist dev user to DB (best effort; don't block on failure)
+    try {
+      authStorage.upsertUser({ id: devUser.id, email: devUser.email, firstName: devUser.firstName, lastName: devUser.lastName, profileImageUrl: devUser.profileImageUrl });
+    } catch (err) {
+      console.error('Failed to upsert dev user:', err);
+    }
+
+    return res.json(devUser);
   }
 
   // Production code

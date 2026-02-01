@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { api } from "@shared/routes";
 import { insertCarSchema, insertBookingSchema } from "@shared/schema";
 import { z } from "zod";
-//import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
+import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
 
 // Middleware to check for admin role
 const isAdmin = async (req: any, res: any, next: any) => {
@@ -24,8 +24,15 @@ export async function registerRoutes(
   app: Express
 ): Promise<Server> {
   // Set up Replit Auth
-  // await setupAuth(app);
-  // registerAuthRoutes(app);
+  if (process.env.NODE_ENV === 'production') {
+    try {
+      await setupAuth(app);
+    } catch (err) {
+      console.error('Error setting up auth:', err);
+    }
+  }
+  // Register auth routes (user info endpoint). isAuthenticated handles dev bypass.
+  registerAuthRoutes(app);
 
   // Cars Routes
   app.get(api.cars.list.path, async (req, res) => {
@@ -44,7 +51,7 @@ export async function registerRoutes(
   });
 
   // Protected Admin Routes for Cars
-  app.post(api.cars.create.path, /* isAuthenticated, isAdmin, */ async (req, res) => {
+  app.post(api.cars.create.path, isAuthenticated, isAdmin, async (req, res) => {
     try {
       const input = insertCarSchema.parse(req.body);
       const car = await storage.createCar(input);
@@ -60,7 +67,7 @@ export async function registerRoutes(
     }
   });
 
-  app.put(api.cars.update.path, /* isAuthenticated, isAdmin, */ async (req, res) => {
+  app.put(api.cars.update.path, isAuthenticated, isAdmin, async (req, res) => {
     try {
       const id = Number(req.params.id);
       const input = insertCarSchema.partial().parse(req.body);
